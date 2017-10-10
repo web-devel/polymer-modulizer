@@ -19,7 +19,7 @@ import * as path from 'path';
 import {Analyzer, Document, FSUrlLoader, InMemoryOverlayUrlLoader, PackageUrlResolver, UrlLoader, UrlResolver} from 'polymer-analyzer';
 
 import {AnalysisConverter, AnalysisConverterOptions} from '../analysis-converter';
-import {configureAnalyzer, configureConverter} from '../convert-package';
+import {configureAnalyzer, configureConverter, ConvertPackageOptions} from '../convert-package';
 import {ConvertedDocumentUrl} from '../url-converter';
 import {getMemberPath} from '../util';
 
@@ -217,7 +217,7 @@ import '../../../@polymer/app-route/app-route.js';
         'bower_components/app-route/app-route.html': `<h1>Hi</h1>`,
         'bower_components/app-storage/app-storage.html': `<h1>Hi</h1>`,
       });
-      assertSources(await convert({packageType: 'application'}), {
+      assertSources(await convert({projectType: 'APPLICATION'}), {
         './test.js': `
 import './nested/test.js';
 import './node_modules/@polymer/app-storage/app-storage.js';
@@ -248,7 +248,7 @@ import '/node_modules/@polymer/app-route/app-route.js';
             'bower_components/app-route/app-route.html': `<h1>Hi</h1>`,
             'bower_components/app-storage/app-storage.html': `<h1>Hi</h1>`,
           });
-          assertSources(await convert({packageType: 'application'}), {
+          assertSources(await convert({projectType: 'APPLICATION'}), {
             './test.js': `
 import './nested/test.js';
 import './node_modules/@polymer/app-storage/app-storage.js';
@@ -2380,8 +2380,9 @@ Polymer({
   });
 
   test('case-map', async () => {
-    const options = {
+    const options: ConvertPackageOptions = {
       inDir: fixturesDirPath,
+      projectType: 'ELEMENT',
       packageName: 'case-map',
       packageVersion: '1.0.0',
       mainFiles: ['case-map/case-map.html']
@@ -2397,8 +2398,9 @@ Polymer({
   });
 
   test('polymer-element', async () => {
-    const options = {
+    const options: ConvertPackageOptions = {
       inDir: fixturesDirPath,
+      projectType: 'ELEMENT',
       packageName: 'polymer-element',
       packageVersion: '1.0.0'
     };

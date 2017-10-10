@@ -18,13 +18,13 @@ import {Analysis, Analyzer, FSUrlLoader, InMemoryOverlayUrlLoader, PackageUrlRes
 import * as rimraf from 'rimraf';
 
 import {AnalysisConverter, AnalysisConverterOptions} from './analysis-converter';
+import {ProjectType} from './document-converter';
 import {generatePackageJson, readJson, writeJson} from './manifest-converter';
 import {polymerFileOverrides} from './special-casing';
 
 const mkdirp = require('mkdirp');
 
-
-type ConvertPackageOptions = AnalysisConverterOptions&{
+export type ConvertPackageOptions = AnalysisConverterOptions&{
   /**
    * The directory to read HTML files from.
    */
@@ -34,6 +34,12 @@ type ConvertPackageOptions = AnalysisConverterOptions&{
    * The directory to write converted JavaScript files to.
    */
   readonly outDir?: string;
+
+  /**
+   * The type of project being converted. Conversion behaves differently between
+   * elements and applications.
+   */
+  readonly projectType: ProjectType;
 
   /**
    * The npm package name to use in package.json
@@ -69,7 +75,7 @@ export function configureConverter(
     analysis: Analysis, options: ConvertPackageOptions) {
   return new AnalysisConverter(analysis, {
     packageName: options.packageName,
-    packageType: 'element',
+    projectType: 'ELEMENT',
     namespaces: options.namespaces,
     excludes:
         [...(options.excludes || []), 'neon-animation/web-animations.html'],

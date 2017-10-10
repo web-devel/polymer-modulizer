@@ -30,6 +30,6 @@ export class WorkspaceConverter extends BaseConverter implements
     const basePackageName = document.url.split('/')[0];
     const packageName = `@polymer/${basePackageName}`;
     return new DocumentConverter(
-        this, document, packageName, 'element', visited);
+        this, document, packageName, 'ELEMENT', visited);
   }
 }

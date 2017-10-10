@@ -35,6 +35,14 @@ import {ConvertedDocumentUrl, convertHtmlDocumentUrl, convertJsDocumentUrl, getD
 import {findAvailableIdentifier, getMemberName, getMemberPath, getModuleId, getNodeGivenAnalyzerAstNode, nodeToTemplateLiteral, serializeNode} from './util';
 
 /**
+ * The document converter (and others) need to know what kind of project the
+ * document is being converted for. For example, if a document is in an element
+ * project, it should reference dependencies as siblings and not as direct
+ * bower_components/ dependencies.
+ */
+export type ProjectType = 'ELEMENT'|'APPLICATION';
+
+/**
  * Pairs a subtree of an AST (`path` as a `NodePath`) to be replaced with a
  * reference to a particular import binding represented by the JSExport
  * `target`.
@@ -144,7 +152,7 @@ export class DocumentConverter {
   private readonly conversionMetadata: ConversionMetadata;
   private readonly document: Document;
   private readonly packageName: string;
-  private readonly packageType: 'element'|'application';
+  private readonly projectType: ProjectType;
 
   // Dependencies not to convert, because they already have been / are currently
   // being converted.
@@ -153,14 +161,14 @@ export class DocumentConverter {
   private readonly _claimedDomModules = new Set<parse5.ASTNode>();
   constructor(
       analysisConverter: ConversionMetadata, document: Document,
-      packageName: string, packageType: 'element'|'application',
+      packageName: string, projectType: ProjectType,
       visited: Set<OriginalDocumentUrl>) {
     this.conversionMetadata = analysisConverter;
     this.document = document;
     this.originalUrl = getDocumentUrl(document);
     this.convertedUrl = convertHtmlDocumentUrl(this.originalUrl);
     this.packageName = packageName;
-    this.packageType = packageType;
+    this.projectType = projectType;
     this.visited = visited;
   }
 
@@ -1032,7 +1040,7 @@ export class DocumentConverter {
         !this.convertedUrl.startsWith('./node_modules');
     const isImportToLocalFile = !jsRootUrl.startsWith('./node_modules');
     const isPackageScoped = this.packageName.includes('/');
-    const isPackageElement = this.packageType === 'element';
+    const isPackageElement = this.projectType === 'ELEMENT';
     let importUrl = getRelativeUrl(this.convertedUrl, jsRootUrl);
     // If this document is an external dependency, or if this document is
     // importing a local file, just return normal relative URL between the two

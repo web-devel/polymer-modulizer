@@ -16,18 +16,22 @@ import * as chalk from 'chalk';
 import * as inquirer from 'inquirer';
 import * as semver from 'semver';
 
-import {CliOptions} from '../cli';
 import {convertPackage} from '../convert-package';
+import {ProjectType} from '../document-converter';
 import {readJson} from '../manifest-converter';
 
-export default async function run(options: CliOptions) {
+import {CliOptions} from './argument-types';
+
+export default async function run(mode: ProjectType, options: CliOptions) {
+  const humanReadableMode = (mode === 'ELEMENT') ? 'Element' : 'Application';
+
   // Ok, we're updating a package in a directory not under our control.
   // We need to be sure it's safe. In a future PR let's check with git, but
   // for now, we'll ask the user to pass in a --force flag.
   if (!options.force) {
     console.error(
-        `When running modulizer on an existing directory, ` +
-        `be sure that all changes are checked into source control. ` +
+        `When running modulizer on an existing directory, be sure ` +
+        `that all changes are checked into source control. \n` +
         `Run with --force once you've verified.`);
     process.exit(1);
   }
@@ -92,13 +96,15 @@ export default async function run(options: CliOptions) {
   }
 
   console.log(
-      chalk.dim('[1/2]') + ' 🌀  ' + chalk.magenta(`Converting Package...`));
+      chalk.dim('[1/2]') + ' 🌀  ' +
+      chalk.magenta(`Converting ${humanReadableMode}...`));
 
   await convertPackage({
     inDir: options.in,
     outDir: options.out,
     excludes: options.exclude,
     namespaces: options.namespace,
+    projectType: mode,
     packageName: npmPackageName.toLowerCase(),
     packageVersion: npmPackageVersion,
     cleanOutDir: options.clean,

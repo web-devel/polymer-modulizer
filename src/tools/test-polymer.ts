@@ -18,7 +18,7 @@ import {Iterable as IterableX} from 'ix';
 import * as fs from 'mz/fs';
 import * as path from 'path';
 
-import {configureAnalyzer, configureConverter} from '../convert-package';
+import {configureAnalyzer, configureConverter, ConvertPackageOptions} from '../convert-package';
 import {ConvertedDocumentUrl} from '../url-converter';
 
 // Install source map support for stack traces, etc.
@@ -62,8 +62,9 @@ function rework(line: string) {
     process.exit(1);
   }
 
-  const options = {
+  const options: ConvertPackageOptions = {
     inDir: sourceDir,
+    projectType: 'ELEMENT',
     packageName: '@polymer/polymer',
     packageVersion: '3.0.0',
   };

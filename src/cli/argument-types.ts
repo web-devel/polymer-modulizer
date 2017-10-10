@@ -14,19 +14,20 @@
 
 import * as commandLineArgs from 'command-line-args';
 
-import runPackageCommand from './cli/command-package';
-import runWorkspaceCommand from './cli/command-workspace';
-
-const optionDefinitions: commandLineArgs.OptionDefinition[] = [
+export const cliArguments: commandLineArgs.OptionDefinition[] = [
+  {
+    name: 'mode',
+    type: String,
+    description: `The mode modulizer mode to run. Available options are: ` +
+        `"element", "workspace".`,
+    defaultOption: true
+  },
   {
     name: 'repo',
     alias: 'r',
     type: String,
     multiple: true,
-    description:
-        'Repositories to convert.  (This is the default option, so the ' +
-        '--repo/-r switch itself is not required.)',
-    defaultOption: true
+    description: 'Repositories to convert.',
   },
   {
     name: 'workspace-dir',
@@ -114,11 +115,12 @@ const optionDefinitions: commandLineArgs.OptionDefinition[] = [
 ];
 
 export interface CliOptions {
+  mode: string;
   repo?: string[];
   help?: boolean;
   version?: boolean;
   out: string;
-  'in'?: string;
+  in ?: string;
   namespace?: string[];
   exclude: string[];
   include: string[];
@@ -128,42 +130,4 @@ export interface CliOptions {
   'workspace-dir'?: string;
   'github-token'?: string;
   force: boolean;
-}
-
-export async function run() {
-  const options: CliOptions = commandLineArgs(optionDefinitions) as any;
-
-  if (options['help']) {
-    const getUsage = require('command-line-usage');
-    const usage = getUsage([
-      {
-        header: 'modulizer',
-        content: `Convert HTML Imports to JavaScript modules
-
-If no GitHub repository names are given, modulizer converts the current
-directory as a package. If repositories are provided, they are cloned into a
-workspace directory as sibling folders as they would be in a Bower
-installation.
-`,
-      },
-      {
-        header: 'Options',
-        optionList: optionDefinitions,
-      }
-    ]);
-    console.log(usage);
-    return;
-  }
-
-  if (options['version']) {
-    console.log(require('../package.json').version);
-    return;
-  }
-
-  if (options['repo']) {
-    await runWorkspaceCommand(options);
-    return;
-  }
-
-  await runPackageCommand(options);
 }

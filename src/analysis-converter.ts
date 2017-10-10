@@ -16,7 +16,7 @@ import {Analysis, Document} from 'polymer-analyzer';
 
 import {BaseConverter, BaseConverterOptions} from './base-converter';
 import {ConversionMetadata} from './conversion-metadata';
-import {DocumentConverter} from './document-converter';
+import {DocumentConverter, ProjectType} from './document-converter';
 import {OriginalDocumentUrl} from './url-converter';
 
 const _isInBowerRegex = /(\b|\/|\\)(bower_components)(\/|\\)/;
@@ -26,7 +26,7 @@ const isNotExternal = (d: Document) =>
 
 export interface AnalysisConverterOptions extends BaseConverterOptions {
   readonly packageName: string;
-  readonly packageType?: 'element'|'application';
+  readonly projectType?: ProjectType;
   readonly mainFiles?: Iterable<string>;
 }
 
@@ -36,13 +36,13 @@ export interface AnalysisConverterOptions extends BaseConverterOptions {
 export class AnalysisConverter extends BaseConverter implements
     ConversionMetadata {
   readonly packageName: string;
-  readonly packageType: 'element'|'application';
+  readonly projectType: ProjectType;
 
   constructor(analysis: Analysis, options: AnalysisConverterOptions) {
     super(analysis, options);
 
     this.packageName = options.packageName;
-    this.packageType = options.packageType || 'element';
+    this.projectType = options.projectType || 'ELEMENT';
 
     const includes = this.includes as Set<string>;
     for (const mainfile of options.mainFiles || []) {
@@ -55,7 +55,7 @@ export class AnalysisConverter extends BaseConverter implements
       document: Document,
       visited: Set<OriginalDocumentUrl>): DocumentConverter {
     return new DocumentConverter(
-        this, document, this.packageName, this.packageType, visited);
+        this, document, this.packageName, this.projectType, visited);
   }
 
   protected filter(document: Document) {
