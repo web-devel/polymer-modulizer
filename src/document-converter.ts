@@ -1111,8 +1111,12 @@ export class DocumentConverter {
     if (this.urlHandler.isImportInternal(this.convertedUrl, toUrl)) {
       return this.urlHandler.getPathImportUrl(this.convertedUrl, toUrl);
     }
-    // Otherwise, return the external import URL formatted for paths.
-    return this.urlHandler.getPathImportUrl(this.convertedUrl, toUrl);
+    // Otherwise, return the external import URL formatted for names or paths.
+    if (this.conversionSettings.npmImportStyle === 'name') {
+      return this.urlHandler.getNameImportUrl(toUrl);
+    } else {
+      return this.urlHandler.getPathImportUrl(this.convertedUrl, toUrl);
+    }
   }
 
   /**
