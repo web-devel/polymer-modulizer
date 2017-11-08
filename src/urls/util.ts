@@ -17,20 +17,6 @@ import {Document} from 'polymer-analyzer';
 
 import {ConvertedDocumentUrl, OriginalDocumentUrl} from './types';
 
-/** The HTML file extension. */
-export const htmlExtension = '.html';
-
-/** The JavaScript file extension. */
-export const jsExtension = '.js';
-
-/**
- * Rewrite a url to replace a `.js` file extension with `.html`.
- */
-export function fixHtmlExtension(htmlUrl: string): string {
-  return htmlUrl.substring(0, htmlUrl.length - htmlExtension.length) +
-      jsExtension;
-}
-
 /**
  * Return a document url property as a OriginalDocumentUrl type.
  */

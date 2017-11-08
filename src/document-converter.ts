@@ -34,7 +34,7 @@ import {rewriteToplevelThis} from './passes/rewrite-toplevel-this';
 import {ProjectConverter} from './project-converter';
 import {ConvertedDocumentFilePath, ConvertedDocumentUrl, OriginalDocumentUrl, PackageType} from './urls/types';
 import {UrlHandlerInterface} from './urls/url-handler-interface';
-import {fixHtmlExtension, getDocumentUrl, htmlExtension} from './urls/util';
+import {getDocumentUrl} from './urls/util';
 import {findAvailableIdentifier, getMemberName, getMemberPath, getModuleId, getNodeGivenAnalyzerAstNode, nodeToTemplateLiteral, serializeNode} from './util';
 
 /**
@@ -1055,28 +1055,23 @@ export class DocumentConverter {
           `from the analyzer, but got "${htmlUrl}"`);
     }
     // Use the layout-specific UrlHandler to convert the URL.
-    let jsUrl = this.urlHandler.convertUrl(htmlUrl);
-
+    let jsUrl: string = this.urlHandler.convertUrl(htmlUrl);
     // Temporary workaround for imports of some shadycss files that wrapped
     // ES6 modules.
     if (jsUrl.endsWith('shadycss/apply-shim.html')) {
       jsUrl = jsUrl.replace(
-                  'shadycss/apply-shim.html',
-                  'shadycss/entrypoints/apply-shim.js') as ConvertedDocumentUrl;
+          'shadycss/apply-shim.html', 'shadycss/entrypoints/apply-shim.js');
     }
     if (jsUrl.endsWith('shadycss/custom-style-interface.html')) {
       jsUrl = jsUrl.replace(
-                  'shadycss/custom-style-interface.html',
-                  'shadycss/entrypoints/custom-style-interface.js') as
-          ConvertedDocumentUrl;
+          'shadycss/custom-style-interface.html',
+          'shadycss/entrypoints/custom-style-interface.js');
     }
-
-    // Convert all HTML URLs to point to JS equivilent
-    if (jsUrl.endsWith(htmlExtension)) {
-      jsUrl = fixHtmlExtension(jsUrl) as ConvertedDocumentUrl;
+    // Convert any ".html" URLs to point to their new ".js" module equivilent
+    if (jsUrl.endsWith('.html')) {
+      jsUrl = (jsUrl.substring(0, jsUrl.length - '.html'.length) + '.js');
     }
-    // TODO(fks): Revisit this format? The analyzer returns URLs without this
-    return jsUrl;
+    return jsUrl as ConvertedDocumentUrl;
   }
 
   /**
