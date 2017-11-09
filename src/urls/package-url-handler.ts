@@ -37,7 +37,8 @@ export class PackageUrlHandler implements UrlHandlerInterface {
    */
   static isUrlInternalToPackage(url: ConvertedDocumentUrl|OriginalDocumentUrl|
                                 ConvertedDocumentFilePath) {
-    return isInBowerComponentsRegex.test(url) || isInNodeModulesRegex.test(url);
+    return !isInBowerComponentsRegex.test(url) &&
+        !isInNodeModulesRegex.test(url);
   }
 
   constructor(packageName: string, packageType?: PackageType) {
@@ -117,25 +118,32 @@ export class PackageUrlHandler implements UrlHandlerInterface {
    */
   getPathImportUrl(fromUrl: ConvertedDocumentUrl, toUrl: ConvertedDocumentUrl):
       string {
+    const isPackageNameScoped = this.packageName.includes('/');
+    const isPackageTypeElement = this.packageType === 'element';
+    const isImportFromLocalFile =
+        PackageUrlHandler.isUrlInternalToPackage(fromUrl);
+    const isImportToExternalFile =
+        !PackageUrlHandler.isUrlInternalToPackage(toUrl);
     let importUrl = getRelativeUrl(fromUrl, toUrl);
-    // If the current project is an element, rewrite imports to point to
-    // dependencies as if they were siblings.
-    if (this.packageType === 'element') {
+
+    // If the import is from the current project:
+    if (isImportFromLocalFile && isPackageTypeElement) {
+      // Rewrite imports to point to dependencies as if they were siblings.
       if (importUrl.startsWith('./node_modules/')) {
         importUrl = '../' + importUrl.slice('./node_modules/'.length);
       } else {
         importUrl = importUrl.replace('node_modules', '..');
       }
-    }
-    // If the current project has a scoped package name, account for the scoping
-    // folder by referencing files up an additional level.
-    if (this.packageName.includes('/')) {
-      if (importUrl.startsWith('./')) {
-        importUrl = '../' + importUrl.slice('./'.length);
-      } else {
-        importUrl = '../' + importUrl;
+      // Account for a npm package name scoping.
+      if (isPackageNameScoped && isImportToExternalFile) {
+        if (importUrl.startsWith('./')) {
+          importUrl = '../' + importUrl.slice('./'.length);
+        } else {
+          importUrl = '../' + importUrl;
+        }
       }
     }
+
     return importUrl;
   }
 }

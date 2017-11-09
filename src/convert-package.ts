@@ -32,7 +32,7 @@ const mkdirp = require('mkdirp');
  * information about the package under conversion, including what files to
  * convert, its new package name, and its new npm version number.
  */
-interface PackageConversionSettings extends PartialConversionSettings {
+export interface PackageConversionSettings extends PartialConversionSettings {
   readonly packageName: string;
   readonly packageVersion: string;
   readonly packageType?: PackageType;
@@ -91,7 +91,7 @@ function getConversionSettings(
 /**
  * Get the relevant documents from a package, to be converted.
  */
-function getPackageDocuments(
+export function getPackageDocuments(
     analysis: Analysis, conversionSettings: ConversionSettings) {
   const htmlDocuments = [...analysis.getFeatures({kind: 'html-document'})];
   return htmlDocuments.filter(
