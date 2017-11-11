@@ -15,7 +15,36 @@
 import {posix as path} from 'path';
 import {Document} from 'polymer-analyzer';
 
-import {ConvertedDocumentUrl, OriginalDocumentUrl} from './types';
+import {ConvertedDocumentFilePath, ConvertedDocumentUrl, OriginalDocumentUrl} from './types';
+
+/**
+ * Rewrite a url to replace a `.html` file extension with `.js`, if found.
+ */
+export function replaceHtmlExtensionIfFound(url: string): string {
+  if (url.endsWith('.html')) {
+    url = url.substring(0, url.length - '.html'.length) + '.js';
+  }
+  return url;
+}
+
+/**
+ * Create a ConvertedDocumentFilePath for the OriginalDocumentUrl of a document
+ * being converted to a JS module.
+ */
+export function getJsModuleConvertedFilePath(originalUrl: OriginalDocumentUrl):
+    ConvertedDocumentFilePath {
+  return replaceHtmlExtensionIfFound(originalUrl) as ConvertedDocumentFilePath;
+}
+
+/**
+ * Create a ConvertedDocumentFilePath for the OriginalDocumentUrl of a document
+ * being converted to a top-level HTML document. (Note that this is a no-op
+ * since HTML documents should keep their current html file extension).
+ */
+export function getHtmlDocumentConvertedFilePath(
+    originalUrl: OriginalDocumentUrl): ConvertedDocumentFilePath {
+  return originalUrl as string as ConvertedDocumentFilePath;
+}
 
 /**
  * Return a document url property as a OriginalDocumentUrl type.

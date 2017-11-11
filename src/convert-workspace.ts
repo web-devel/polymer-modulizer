@@ -23,9 +23,8 @@ import {ProjectConverter} from './project-converter';
 import {polymerFileOverrides} from './special-casing';
 import {lookupNpmPackageName, WorkspaceUrlHandler} from './urls/workspace-url-handler';
 
-import util = require('util');
-import _mkdirp = require('mkdirp');
-const mkdirp = util.promisify(_mkdirp);
+import {mkdirp, writeFileResults} from './util';
+
 
 /**
  * Configuration options required for workspace conversions. Contains
@@ -68,7 +67,8 @@ function writePackageJson(repo: WorkspaceRepo, packageVersion: string) {
   const bowerPackageName = path.basename(repo.dir);
   const bowerJsonPath = path.join(repo.dir, 'bower.json');
   const bowerJson = readJson(bowerJsonPath);
-  const npmPackageName = lookupNpmPackageName(bowerJsonPath) || bowerPackageName;
+  const npmPackageName =
+      lookupNpmPackageName(bowerJsonPath) || bowerPackageName;
   const packageJson =
       generatePackageJson(bowerJson, npmPackageName, packageVersion);
   writeJson(packageJson, repo.dir, 'package.json');
@@ -113,15 +113,7 @@ export default async function convert(options: WorkspaceConversionSettings) {
   }
 
   // Process & write each conversion result:
-  const results = converter.getResults();
-  for (const [outUrl, newSource] of results) {
-    const outPath = path.join(options.workspaceDir, outUrl);
-    if (newSource === undefined) {
-      await fs.unlink(outPath);
-    } else {
-      await fs.writeFile(outPath, newSource);
-    }
-  }
+  await writeFileResults(options.workspaceDir, converter.getResults());
 
   // For each repo, generate a new package.json:
   for (const repo of options.reposToConvert) {

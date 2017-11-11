@@ -71,18 +71,33 @@ export class ProjectConverter {
   }
 
   /**
+   * Check if a document is explicitly excluded or has already been converted
+   * to decide if it should be converted or skipped.
+   */
+  shouldConvertDocument(document: Document): boolean {
+    const documentUrl = getDocumentUrl(document);
+    if (this.conversionResults.has(documentUrl)) {
+      return false;
+    }
+    for (const exclude of this.conversionSettings.excludes) {
+      if (documentUrl.endsWith(exclude)) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  /**
    * Specifically convert an HTML document to a JS module. Useful during
    * conversion for dependencies where the type of result is explictly expected.
    */
   convertDocumentToJs(document: Document, visited: Set<OriginalDocumentUrl>) {
-    if (this.conversionResults.has(getDocumentUrl(document))) {
+    if (!this.shouldConvertDocument(document)) {
       return;
     }
     const documentConverter = new DocumentConverter(this, document, visited);
     const newModule = documentConverter.convertToJsModule();
-    if (newModule) {
-      this.handleConversionResult(newModule);
-    }
+    this.handleConversionResult(newModule);
   }
 
   /**
@@ -91,7 +106,7 @@ export class ProjectConverter {
    * conversion for dependencies where the type of result is explictly expected.
    */
   convertDocumentToHtml(document: Document, visited: Set<OriginalDocumentUrl>) {
-    if (this.conversionResults.has(getDocumentUrl(document))) {
+    if (!this.shouldConvertDocument(document)) {
       return;
     }
     const documentConverter = new DocumentConverter(this, document, visited);
