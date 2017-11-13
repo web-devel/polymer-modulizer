@@ -37,7 +37,6 @@ interface WorkspaceConversionSettings extends PartialConversionSettings {
   reposToConvert: WorkspaceRepo[];
 }
 
-
 /**
  * Create a symlink from the repo into the workspace's node_modules directory.
  */
